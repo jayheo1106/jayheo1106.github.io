@@ -23,3 +23,8 @@ package-lock.json
 !.vscode/tasks.json
 
 # Misc
+<<<<<<< HEAD
+=======
+_sass/dist
+# assets/js/dist
+>>>>>>> 7d546c815d31d69f27ac0e333cf2bac7fcf38227
