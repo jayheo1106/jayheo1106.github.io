@@ -1,0 +1,263 @@
+---
+layout: post
+title: single cell RNA-Sequencing
+date: 2024-10-17 04:00:00 +0300
+description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
+img: rna.avif # Add image post (optional)
+tags: [rna, dna, sequencing, clustering] # add tag
+---
+
+
+## My First Challenge in Bioinformatics
+
+For me, bioinformatics was a big challenge. I had mainly worked with clinical data, economic data, spatial data, and other types of data I can think of. However, biology—especially RNA sequencing data—was a completely new topic for me. I want to summarize what I’ve learned about single-cell RNA sequencing and how it is applied in a statistical way.
+
+## What is Single-Cell RNA Sequencing Analysis?
+
+The next-generation RNA sequencing technology developed in the 2000s has opened a new door in biology by allowing us to measure thousands to tens of thousands of genes at once. Since then, sequencing technology has continued to advance, leading us into the era of single-cell sequencing, where we can measure thousands of genes from a single cell simultaneously. Single-cell sequencing technology is evolving rapidly; we have moved from handling just a few dozen cells to now being able to process millions of cells at once. This progress has greatly expanded our ability to observe biological phenomena. Research across various fields of biology is now taking a new approach at the single-cell level, revealing many new types of cells that were previously unknown.
+
+To summarize the experimental and analytical techniques developed for single-cell sequencing so far, there are now dozens of types of single-cell sequencing technologies, but their fundamental principles are not very different from traditional RNA sequencing. Generally, we selectively reverse transcribe mRNA with poly(A) tails using oligo-dT primers. During this process, we amplify the reverse-transcribed DNA using adaptor sequences to create a cDNA library. The key to single-cell sequencing technology is to make this process highly efficient, maximizing the amplification of RNA from a single cell while tagging each cell's RNA with unique barcode sequences to categorize them. Various methods have been developed to achieve this, including plate-based sequencing, droplet-based sequencing, microwell-based sequencing, and in situ combinatorial indexing. In single-cell sequencing experiments, it’s crucial to properly isolate healthy single cells during the preparation phase.
+
+The basic unit of single-cell sequencing analysis is a single cell. However, due to sensitivity limitations, we cannot capture all RNA molecules from a cell, so we often miss significant information when looking at a single cell. Therefore, the key to single-cell sequencing analysis is to classify information from multiple cells, grouping similar cells together, and then analyzing these clusters as one unit. One might wonder if this is much different from bulk RNA sequencing. The important difference is that bulk RNA sequencing analyzes the average of all cells in a sample, while single-cell sequencing allows us to look at each individual cell and identify the different cell types present. Then, we can calculate the average for each cell type separately. This way, we can understand the diversity of cell populations while obtaining information with sensitivity comparable to traditional RNA sequencing.
+
+So, how do we analyze the results of single-cell sequencing? Currently, single-cell sequencing methods are becoming more standardized. The process generally includes (1) pre-processing, (2) dimensionality reduction, (3) transforming data into a graph format, and (4) graph clustering and analyzing the connection structure (pseudotime).
+
+## My Research
+
+I am analyzing RNA sequencing data from fly brains collected in the biology lab at Texas A&M University. 
+
+To store and analyze single-cell data, the R package Seurat or the Python package Scanpy is commonly used. In my case, I used the Seurat package in R. Since the research has not yet been published, I want to describe the analysis process using functions provided by the Seurat package.
+
+---
+
+# Drosophila scRNA-seq Analysis Portfolio
+
+## Overview
+In this analysis, I conducted single-cell RNA sequencing (scRNA-seq) of fly data, aiming to integrate multiple datasets, identify clusters, visualize data using UMAP, and transfer cell type labels from a reference dataset. Below, I summarize the key steps taken and the important functions utilized throughout the process.
+
+## Data Normalization and Preprocessing
+
+To begin the analysis, I normalized the scRNA-seq data, identified highly variable features, scaled the data, and performed Principal Component Analysis (PCA). This is a crucial step in ensuring that the data is suitable for downstream analyses.
+
+```r
+fly <- NormalizeData(fly, normalization.method = "LogNormalize", 
+                     scale.factor = 10000)
+fly <- FindVariableFeatures(fly, selection.method = "vst", nfeatures = 2000)
+fly <- ScaleData(fly, features = rownames(fly))
+fly <- RunPCA(fly, features = VariableFeatures(object = fly))
+```
+
+## Integration of Datasets
+
+Next, I integrated multiple layers of data using Canonical Correlation Analysis (CCA), identified neighbors, and clustered the data. I specified a minimum cell count per cluster, ensuring only significant clusters were retained for analysis.
+
+```r
+# Integration Process
+fly <- IntegrateLayers(object = fly, method = CCAIntegration,
+                        orig.reduction = "pca", new.reduction = "integrated.cca", 
+                        verbose = FALSE)
+fly[["RNA"]] <- JoinLayers(fly[["RNA"]])
+fly <- FindNeighbors(fly, reduction = "integrated.cca", dims = 1:10)
+fly <- FindClusters(fly, resolution = 0.4)
+fly <- RunUMAP(fly, dims = 1:10, reduction = "integrated.cca",
+                reduction.name = "umap.integrated")
+
+# Remove clusters with less than 100 cells
+fly = fly[, !fly$seurat_clusters %in% names(which(table(fly$seurat_clusters) < 100))]
+fly$seurat_clusters = droplevels(fly$seurat_clusters)
+```
+
+This resulted in the identification of a total of **12 clusters**, with clusters containing fewer than 100 cells removed.
+
+## UMAP Visualization
+
+For data visualization, I employed UMAP to display the integrated data and identify clusters by condition.
+
+```r
+# Visualization
+DimPlot(fly, reduction = "umap.integrated", label = TRUE, 
+        group.by = c("seurat_clusters","Condition"))
+DimPlot(fly, reduction = "umap.integrated", label = TRUE, split.by = "Condition")
+```
+
+Additionally, I visualized the number of cells per condition in each cluster, providing insight into the distribution of cell types across different conditions.
+
+```r
+cell_data <- data.frame(
+  Cluster = fly@meta.data$seurat_clusters,
+  Condition = fly@meta.data$Condition
+)
+
+cell_counts <- cell_data %>%
+  group_by(Cluster, Condition) %>%
+  summarise(Count = n()) %>%
+  arrange(Cluster, Condition)
+
+ggplot(cell_counts, aes(x = Cluster, y = Count, fill = Condition)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Cluster", y = "Number of Cells", fill = "Condition") +
+  theme_minimal() +
+  ggtitle("Number of Cells per Condition in Each Cluster (after integration)")
+```
+
+## Reference Data Integration and Label Transfer
+
+I then loaded a reference dataset (the Aging Fly Cell Atlas), cleaned the data to focus on consistent cell type annotations, and created new annotations for specific cell types of interest. 
+
+```r
+library(zellkonverter)
+library(SingleCellExperiment)
+library(glmGamPoi)
+
+sce <- readH5AD("adata_head_S_v1.0.h5ad")
+ref <- CreateSeuratObject(counts = assay(sce, "X"), 
+                          meta.data = as.data.frame(colData(sce)),
+                          project = "Reference")
+
+# Filter to include only relevant datasets and annotations
+ref = ref[, ref$dataset == 'FCA']
+ref = ref[, ref$afca_annotation != 'unannotated']
+ref = ref[, ref$afca_annotation_broad %in% c("CNS neuron", "glial cell")]
+```
+
+Next, I created a new annotation that grouped subtypes of CNS neurons and glial cells into distinct categories.
+
+```r
+# Create new annotations based on existing labels
+ref$new_annotation <- as.character(ref$afca_annotation)
+
+# Example of relabeling specific cell types
+ref$new_annotation[grep("Kenyon cell", ref$afca_annotation)] <- "Kenyon cell"
+# (Add additional relabeling as needed)
+```
+
+## Quality Control and Final Visualization
+
+Quality control was conducted on the reference data to ensure the integrity of the annotations.
+
+```r
+# Quality control on reference data
+VlnPlot(ref, features = c("nFeature_RNA", "nCount_RNA"))
+ref <- subset(ref, subset = nFeature_RNA > 300 & nFeature_RNA < 2000 &
+              nCount_RNA > 500 & nCount_RNA < 3000)
+```
+
+Finally, I performed a transfer of cell type labels from the reference dataset to the fly dataset, using the anchors identified during the integration process.
+
+```r
+# Cell type label transfer
+anchors <- FindTransferAnchors(
+  reference = ref,
+  query = fly,
+  dims = 1:15,
+  reference.reduction = "pca"
+)
+
+fly <- MapQuery(
+  anchorset = anchors,
+  query = fly,
+  reference = ref,
+  refdata = list(afca_annotation_broad = "afca_annotation_broad"),
+  reference.reduction = "pca"
+)
+
+# Visualize transferred labels
+DimPlot(fly, label = TRUE)
+DimPlot(fly, group.by = 'predicted.new_annotation', label = TRUE)
+```
+
+---
+
+
+## Cluster Analysis
+
+In this project, I performed a comprehensive analysis of single-cell RNA sequencing (scRNA-seq) data to identify and annotate different cell types within the dataset. The key steps in my analysis included data filtering, normalization, clustering, and differential expression analysis.
+
+### 1. Data Annotation and Filtering
+
+After transferring predicted labels to the data, I filtered cells based on a maximum prediction score to ensure data quality. A histogram and violin plot illustrated the distribution of these scores:
+
+```r
+# Before filtering 
+hist(fly$predicted.new_annotation.score)
+
+VlnPlot(fly, features = "predicted.new_annotation.score", 
+        group.by = "seurat_clusters", pt.size = 0.1, 
+        fill = "lightgreen") + 
+  labs(title = "Distribution of Max Prediction Score by Cluster", 
+       y = "Max Prediction Score")
+```
+
+Using a threshold of 0.8 (based on a referenced paper), I removed cells that did not meet this criterion, resulting in the exclusion of 7,764 cells from the analysis:
+
+```r
+# Extract the removed cells with 0.8 threshold
+removed_cells <- fly@meta.data[fly$predicted.new_annotation.score < 0.8,]
+# Filter the cells with 0.8 threshold
+fly <- subset(fly, cells = which(fly$predicted.new_annotation.score > 0.8))
+```
+
+### 2. Clustering and Normalization
+
+After data quality checks, I renormalized the data and performed clustering using PCA for dimensionality reduction:
+
+```r
+fly <- NormalizeData(fly, normalization.method = "LogNormalize", scale.factor = 10000)
+fly <- FindVariableFeatures(fly, selection.method = "vst", nfeatures = 2000)
+fly <- ScaleData(fly, features = rownames(fly))
+fly <- RunPCA(fly, features = VariableFeatures(object = fly))
+
+fly <- FindNeighbors(fly, reduction = "integrated.cca", dims = 1:10)
+fly <- FindClusters(fly, resolution = 0.4)
+fly <- RunUMAP(fly, dims = 1:10, reduction = "integrated.cca")
+```
+
+### 3. Visualization of Clusters
+
+To visualize the distribution of cells and their predicted labels, I used UMAP and dot plots:
+
+```r
+Idents(fly) <- "predicted.new_annotation"
+DimPlot(fly, reduction = 'umap.integrated', label = TRUE)
+
+# Dot plot for marker genes
+genes_of_interest <- c("repo", "moody", "nSyb", "elav", ...)
+DotPlot(object = fly, features = genes_of_interest, cols = c("blue", "red"), dot.scale = 8)
+```
+
+### 4. Differential Expression Analysis
+
+Using the `FindMarkers` function, I identified differentially expressed genes across clusters, focusing on significant markers with adjusted p-values < 0.05:
+
+```r
+fly$condition.cluster <- paste(fly$Condition, fly$seurat_clusters, sep = "_")
+Idents(fly) <- "condition.cluster"
+
+significant_genes <- list()
+num_clusters <- 12
+
+for (i in 0:(num_clusters - 1)) {
+  markers_table <- FindMarkers(fly, ident.1 = paste0("WT_", i), ident.2 = paste0("Q5A_", i), verbose = FALSE)
+  markers <- rownames(markers_table[markers_table$p_val_adj <= 0.05, ])
+  significant_genes[[paste0("Cluster_", i)]] <- markers
+}
+```
+
+### 5. Gene Overlap Analysis
+
+To analyze the overlap of significant genes across clusters, I employed an upset plot:
+
+```r
+# UpSet plot for gene overlap
+library(UpSetR)
+upset(fromList(significant_genes), nsets = 15, keep.order=TRUE)
+```
+
+## Conclusion
+
+In this project, I successfully performed a comprehensive analysis of scRNA-seq data using various techniques, including normalization, integration, clustering, visualization, and label transfer. The resulting clusters and annotations provide valuable insights into the underlying biology of the dataset, paving the way for further analysis and exploration.
+
+
+
+### Reference 
+Jong Eun Park (2018). Trends in Single-cell RNA Sequencing Technology. BRIC View 2018-T28. Available from https://www.ibric.org/bric/trend/bio-report.do?mode=view&articleNo=8692269 (Accessed on Aug 09, 2018).
