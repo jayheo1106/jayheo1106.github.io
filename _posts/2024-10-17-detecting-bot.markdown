@@ -4,7 +4,7 @@ title: Detecing Bots using ChatGPT - Project Overview
 date: 2024-10-17 00:00:00 +0300
 description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
 img: chatgpt.avif # Add image post (optional)
-categories: [Machine Learing]
+categories: [Machine Learning]
 tags: [ChatGPT, AI, Twitter, Bot, Topicmodeling, LDA] # add tag
 ---
 
