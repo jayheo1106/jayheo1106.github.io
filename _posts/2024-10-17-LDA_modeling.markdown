@@ -142,8 +142,8 @@ LDA topic modeling offers valuable insights into the structure of text data, hel
 ### References
 
 - Murzintcev, Nikita. n.d. “Select Number of Topics for LDA Model.” [CRAN](https://cran.r-project.org/web/packages/ldatuning/vignettes/topics.html).
-- Cao Juan, Xia Tian, Li Jintao, Zhang Yongdong, and Tang Sheng. 2009. A density-based method for adaptive LDA model selection. *Neurocomputing* 72, 7–9: 1775–1781. [DOI](http://doi.org/10.1016/j.neucom.2008.06.011).
-- Romain Deveaud, Éric SanJuan, and Patrice Bellot. 2014. Accurate and effective latent concept modeling for ad hoc information retrieval. *Document numérique* 17, 1: 61–84. [DOI](http://doi.org/10.3166/dn.17.1.61-84).
+- Cao Juan, Xia Tian, Li Jintao, Zhang Yongdong, and Tang Sheng. 2009. A density-based method for adaptive LDA model selection. *Neurocomputing* 72, 7–9: 1775–1781. [DOI](https://doi.org/10.1016/j.neucom.2008.06.011).
+- Romain Deveaud, Éric SanJuan, and Patrice Bellot. 2014. Accurate and effective latent concept modeling for ad hoc information retrieval. *Document numérique* 17, 1: 61–84. [DOI](https://doi.org/10.3166/dn.17.1.61-84).
 
 ### Bonus WordCloud Code
 
