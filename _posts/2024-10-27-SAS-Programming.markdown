@@ -7,13 +7,20 @@ tags: [programming, SAS] # add tag
 ---
 
 
-Hello! I’d like to share some recent updates about myself and share my past project using SAS programming.
+Hello!
 
-In the fall semester of 2022, I took an Intro to SAS Programming course at Ohio State University. I had been programming mostly in R, so learning a new language was very exciting, especially with such a great professor!
+I’d like to share some recent updates about myself and showcase a past project where I used SAS programming.
 
-Right now, I’m preparing to become a biostatistician, and SAS programming is one of the essential skills required. Looking back, I wish I had aimed to earn the SAS programming certification while taking that class! Haha. To prove my skills, I’m planning to obtain that certification by December. Here we go!
+Currently, I’m preparing to become a biostatistician, and SAS programming is one of the essential skills required in this field. Looking back, I wish I had tried to earn the SAS programming certification while taking that course—haha! To demonstrate my skills, I’m planning to obtain the certification by December. For sure!
 
-And now, I’d like to introduce a project that I worked hard on back in 2022.
+Now, let’s take a look at what I worked on in that course!
+
+In the fall semester of 2022, I took an Intro to SAS Programming course at Ohio State University. Having primarily programmed in R, learning SAS was an exciting challenge, especially with such a great professor! My friends and I analyzed an electric vehicle (EV) dataset, which contained details such as range under various conditions, technical specifications, battery capacities, and more. One of my group members was about to start a full-time job at Tesla, and since I also had stock in Tesla, this added a fun twist to our motivation for the project.
+
+Our group's analysis goal was ultimately to **determine which brand of electric vehicles is the best**. Each member created their own analytic criteria and generated corresponding variables to identify the best brand.
+
+I’ve summarized our report and included my research question below. You can find the full report available for download at the end of the article.
+
 
 ## Introduction
 As global warming and greenhouse gas emissions become increasingly important topics on the world stage, one industry in particular is experiencing a revolution: the automobile industry. Due to a demand for alternatives to today’s fossil fuel powered automobiles, competition in the electric vehicle sector is booming. As a result, the number of electric vehicles in the market has proliferated at a rate never seen before. But how will consumers choose the best electric vehicle? Do the properties of the vehicle change under different conditions? There are many standards used to evaluate electric vehicles, including acceleration time, safety, weight, battery, charging time, life span, and many more. The challenge of determining the best electric vehicle brands is a daunting one, but still attractive to data analysts. In this study, we will use SAS to explore various questions related to electric vehicles, and return a performance ranking based on electric vehicle data pulled from the Electric Vehicle Database.
@@ -51,7 +58,7 @@ In Table 1, 34 brands are analyzed. Key findings include:
 A more reliable conclusion can be drawn if each brand has more samples.
 
 
-## Analysis
+## My Analysis
 ### Specific Question (Jay's Question): Range Over 300 Miles
 
 **Objective:**  
@@ -70,6 +77,64 @@ First, the dataset includes varying sample sizes across brands, with some brands
 
 Lastly, while range and charging capabilities are important indicators of EV performance, other factors, such as vehicle design, price, and charging infrastructure, also play crucial roles in consumer decisions. Automakers balance these features based on industry trends and consumer needs, meaning that range alone may not fully capture a vehicle's performance. Despite these considerations, this analysis highlights a pivotal shift in the EV industry, where extended range capabilities are becoming increasingly standard, illustrating both technological advancement and a promising future for electric mobility.
 
+## SAS Code
+```sas
+/* Import Data */
+proc import datafile="/data/ev_data.csv" 
+    out=ev_data 
+    dbms=csv 
+    replace;
+    getnames=yes;
+run;
+
+/* Data Preparation and New Variables Calculation */
+data ev_data_clean;
+    set ev_data;
+
+    /* Calculate average range across conditions */
+    Avg_Range = mean(Range_Cold, Range_Mild);
+
+    /* Calculate average city, highway, and combined ranges */
+    Avg_City = mean(City_Range_Cold, City_Range_Mild);
+    Avg_Highway = mean(Highway_Range_Cold, Highway_Range_Mild);
+    Avg_Combined = mean(Combined_Range_Cold, Combined_Range_Mild);
+
+    /* Calculate Charging Time */
+    Charge_Time = Electric_Range / Charge_Speed;
+
+    /* Calculate Range Score */
+    RangeScore = Electric_Range / Total_Power;
+run;
+
+/* Summary Statistics */
+title "Summary Statistics for Electric Vehicles";
+proc means data=ev_data_clean n mean std min max;
+    var Avg_Range Avg_City Avg_Highway Avg_Combined Charge_Time RangeScore;
+run;
+
+/* One-Sample T-Test */
+title "One-Sample T-Test on EV Range Over 300 Miles";
+proc ttest data=ev_data_clean h0=300;
+    var Electric_Range;
+run;
+
+/* Brand Performance Analysis */
+title "Brand Performance Analysis";
+proc means data=ev_data_clean mean;
+    by Make;
+    var Electric_Range Charge_Time Acceleration_0_100;
+    output out=brand_analysis mean=mean_range mean_charge_time mean_acceleration;
+run;
+
+/* Displaying Key Findings */
+title "Key Findings for Selected Brands";
+proc print data=brand_analysis;
+    where Make in ('Renault', 'Mercedes', 'Mini', 'Dacia');
+    var Make mean_range mean_charge_time mean_acceleration;
+run;
+
+```
+
 ## References
 - Bengt Halvorson. "Range life: The 8 EVs EPA-rated for 300 miles or more." *Green Car Reports*, September 19, 2021, [source](https://www.greencarreports.com/news/1133620_range-life-the-8-evs-epa-rated-for-300-miles-or-more)
 - Lora D. Delwiche and Susan J. Slaughter. *The Little SAS Book, 6th Edition*. SAS Institute.
@@ -77,3 +142,8 @@ Lastly, while range and charging capabilities are important indicators of EV per
 - SAS Institute, Inc. (2018). *SAS Studio 3.8 (Enterprise Edition)* for Linux.
 - KIA Motors, [website link](https://www.kia.com/kr/vehicles/kia-ev/vehicles)
 - "What Do Consumers Really Want From an Electric Vehicle?", *iVendi*, March 3, 2022, [source](https://www.ivendi.com/news/what-do-consumers-really-want-from-an-electric-vehicle)
+
+
+
+[Click here to view the analysis report PDF file](./pdf/Group_FinalReport_14.pdf)
+
