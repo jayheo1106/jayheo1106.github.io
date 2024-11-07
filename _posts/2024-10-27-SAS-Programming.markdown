@@ -59,7 +59,7 @@ A more reliable conclusion can be drawn if each brand has more samples.
 
 
 ## My Analysis
-### Specific Question (Jay's Question): Range Over 300 Miles
+### Specific Question 1 (Jay's Question): Range Over 300 Miles
 
 **Objective:**  
 The objective of this analysis is to determine whether the average range of electric vehicles (EVs) on a full charge exceeds 300 miles. In the past, Tesla was one of the only major manufacturers producing vehicles with such a range. However, advancements in EV technology have led many other automakers to introduce models surpassing this threshold. This shift is critical to understanding both the progress within the EV industry and the growing options available to consumers seeking extended vehicle range.
@@ -70,6 +70,27 @@ A one-sample t-test was conducted using `PROC TTEST` in SAS to assess whether th
 **Results:**  
 The test yielded a significant p-value, leading to the rejection of the null hypothesis. This suggests that the average range of EVs indeed exceeds 300 miles. The 95% confidence interval for the mean range spans from 333.6 miles to infinity, which provides further statistical evidence that modern EVs have evolved to meet and surpass this milestone. This outcome supports the notion that the electric vehicle industry has made substantial strides in recent years.
 
+
+### Specific Question 2 (Jay's Question): Longest Range Relative to Battery Capacity
+
+**Objective:**  
+The objective of this analysis is to identify which brand of electric vehicle (EV) offers the longest average range in relation to battery capacity. Understanding this metric is essential as it allows consumers to evaluate the efficiency of EVs, particularly when considering how far a vehicle can travel on a single charge relative to the size of its battery. This information can greatly influence consumer choices in a competitive market.
+
+**Methods:**  
+To determine which car brand has the longest average range in terms of battery capacity, I created a new variable, **RangeScore**, defined as:
+\[
+\text{RangeScore} = \frac{\text{Electric Range}}{\text{Battery Capacity}}
+\]
+Using the `PROC MEANS` procedure in SAS, I calculated the descriptive statistics for the **RangeScore** grouped by each brand. After sorting the results in descending order, I was able to identify the brand that offers the longest range relative to battery capacity.
+
+**Results:**  
+Table 9 confirms that **Renault** has the highest average **RangeScore** among electric car manufacturers. However, while calculating the mean **RangeScore** for each company, it is important to consider the limitations inherent in the analysis. Different companies have varying numbers of electric models, which can significantly affect the mean **RangeScore**. For example, Kia Motors has a model with a range of 380 miles and another with a range of only 280 miles. According to Kia's official website, they currently offer six distinct electric vehicles, which can be categorized into three standard cars and three cargo electric vans. Each model has unique performance specifications tailored to different usage scenarios and target markets. Consequently, the comparison of **RangeScore** among brands can be misleading due to the varying numbers of models, corporate policies, and target audiences.
+
+To mitigate this issue, one potential approach is to compare only the highest range vehicles from each brand. However, this method raises concerns about representativeness, as relying on a single model may not provide a comprehensive picture of a brand's overall performance.
+
+​
+
+
 ## Discussion
 The results of this analysis underscore the notable advancements in EV technology, specifically in achieving ranges that exceed 300 miles, a previously rare feat. This finding is a testament to the rapid growth and innovation within the EV industry, as manufacturers strive to enhance battery efficiency and vehicle design to meet evolving consumer demands. While the statistical test indicates a strong trend towards longer ranges, it is essential to note several limitations within the data.
 
@@ -78,6 +99,7 @@ First, the dataset includes varying sample sizes across brands, with some brands
 Lastly, while range and charging capabilities are important indicators of EV performance, other factors, such as vehicle design, price, and charging infrastructure, also play crucial roles in consumer decisions. Automakers balance these features based on industry trends and consumer needs, meaning that range alone may not fully capture a vehicle's performance. Despite these considerations, this analysis highlights a pivotal shift in the EV industry, where extended range capabilities are becoming increasingly standard, illustrating both technological advancement and a promising future for electric mobility.
 
 ## SAS Code
+
 ```sas
 /* Import Data */
 proc import datafile="/data/ev_data.csv" 
@@ -144,6 +166,5 @@ run;
 - "What Do Consumers Really Want From an Electric Vehicle?", *iVendi*, March 3, 2022, [source](https://www.ivendi.com/news/what-do-consumers-really-want-from-an-electric-vehicle)
 
 
-
-[Click here to view the analysis report PDF file](./pdf/Group_FinalReport_14.pdf)
+./pdf/Group_FinalReport_14.pdf
 
