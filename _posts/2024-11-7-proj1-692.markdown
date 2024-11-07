@@ -43,7 +43,7 @@ This report presents summary statistics and regression analysis results based on
 - **Spatial Clustering**: K-means clustering of villages for regional analysis, visualized below.
 
 
-![figure1,2](proj1-1.png)
+![figure1,2](/Users/jaeheo/jayheo1106.github.io/_site/assets/img/proj1-1.png)
 
 Missing data were removed from the dataset, reducing the sample to 1,198 observations for pathogens with missing values excluded on an as-needed basis.
 
@@ -68,15 +68,15 @@ The Chi-square test was used to identify significant associations, with logistic
 - **Chi-square Results**: Significant association with sex (p = 0.0001), suggesting males are more likely to be infected. No significant differences by age or region.
 - **Logistic Regression**: Males have a 61% higher likelihood of infection than females (exp(0.4771) = 1.611, p = 0.0001), confirming sex as a key predictor.
 
-![figure2](proj1-2.png)
-![figure3](proj1-3.png)
+![figure2](/Users/jaeheo/jayheo1106.github.io/_site/assets/img/proj1-2.png)
+![figure3](/Users/jaeheo/jayheo1106.github.io/_site/assets/img/proj1-3.png)
 
 ### C. M. haematoparvum
 - **Chi-square Results**: Significant associations with age (p < 2.2e-16), sex (p = 0.0009), and region (p = 4.05e-08).
 - **Logistic Regression**: Age, sex, and region remained significant after backward elimination.
 
-![alt text](proj1-4.png)
-![alt text](proj1-5.png)
+![alt text](/Users/jaeheo/jayheo1106.github.io/_site/assets/img/proj1-4.png)
+![alt text](/Users/jaeheo/jayheo1106.github.io/_site/assets/img/proj1-5.png)
 
 (Repeat this format for each pathogen with summaries and specific results for Chi-square and Logistic Regression outcomes)
 
