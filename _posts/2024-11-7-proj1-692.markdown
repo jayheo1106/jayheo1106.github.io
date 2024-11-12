@@ -43,7 +43,7 @@ This report presents summary statistics and regression analysis results based on
 - **Spatial Clustering**: K-means clustering of villages for regional analysis, visualized below.
 
 
-![figure1,2](/Users/jaeheo/jayheo1106.github.io/_site/assets/img/proj1-1.png)
+![figure1,2](https://github.com/user-attachments/assets/720307b6-cbd1-4efe-8aed-b729c096ec18)
 
 Missing data were removed from the dataset, reducing the sample to 1,198 observations for pathogens with missing values excluded on an as-needed basis.
 
