@@ -7,15 +7,14 @@ tags: [Power, SampleSize] # add tag
 ---
 
 
-수년간 여러 statistical method을 봤지만 이번에 biostatisitcs과 survival analysis를 배우면서
-clinical trial 데이터를 많이 접하게 되었는데 이렇게까지 sampel size가 작은 경우도 많은지 다시금 깨닫게 되었다. 
-교수님께서는 보통.. 샘플수가 6.. 그럴수도 있다고 했는데 처음 들었을때는 적잖은 충격이었다. 왜냐하면 그냥 통계 다 뺴고 그게 뭐 검정이 되는지 잘 이해가 안됬기 때문이다. 어쩃든! 
+I've studied many statistical methods over the years, but recently, as I learned about biostatistics and survival analysis, I started working with clinical trial data. I was surprised to see how small the sample sizes can be. My professor even mentioned that having just six samples is possible, which shocked me at first. I couldn’t understand how a test could be valid with such a small sample size.
 
-Power analysis란 우리가 얼만큼의 이 실험들의 power를 가지고 싶은지, siginifiance,그리고 effect size 이 3가지를 정하게 되면 sample size를 몇개가 있으면 미리 판단을 할수 있는 것이다. 
-왜냐하면 실험하기 전에 연구자가 몇개의 실험체를 써야하는지 budget문제도 많기 때문에 가장 효율적인 테스트를 하면 좋을테니 말이다. 
-나는 stat을 공부하고 또 statistical analysis 를 제공하는 사람이 되고싶기 떄문에 특히 power analysis 배우는게 너무 재밌었다. 
+Power analysis helps us decide how many samples we need before running an experiment. It depends on three things: how much power we want, the significance level, and the effect size. Researchers need to know this in advance because experiments cost money, and it's important to design tests efficiently.
 
-따라서, Power analysis는 연구 설계 단계에서 매우 중요한 통계적 기법으로, 연구가 가설을 검증할 수 있는 충분한 데이터(표본 크기)를 확보했는지 평가하는 데 사용됩니다. 통계적 검정의 "힘(power)"을 계산하여 연구가 실제로 의미 있는 차이를 감지할 확률을 측정하는 것이죠. Power가 높을수록 연구 결과의 신뢰도가 높아집니다.
+Since I want to study statistics and provide statistical analysis, I found power analysis really interesting.
+
+In simple terms, power analysis is an important statistical tool used during study planning. It helps researchers make sure they have enough data (sample size) to test their hypothesis. It calculates the "power" of a statistical test, which tells us how likely we are to detect a real effect. The higher the power, the more reliable the study results.
+
 
 ## Core Concepts in Power Analysis
 1. Power: This is the probability that the study will correctly identify a true effect. A power of 80% or higher is commonly targeted, meaning that the study has an 80% chance of detecting an actual effect if one exists.
